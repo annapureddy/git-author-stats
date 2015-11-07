@@ -1,8 +1,8 @@
 #! /bin/bash
 
 # Repositories
-authors="akunjith reddy pmathew rbmv sada siyangliu krithiva sujitn vkbajpai vinreddy"
-repos="yqlp_video yqlp_video_tenant"
+authors=""
+repos=""
 since="2015-07-01"
 until="2015-10-01"
 
