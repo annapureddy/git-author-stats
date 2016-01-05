@@ -3,8 +3,11 @@
 # Repositories
 authors=""
 repos=""
-since="2015-07-01"
-until="2015-10-01"
+#authors=""
+#repos=""
+since="2015-10-01"
+until="2015-12-28"
+ignore_commits_with_lines=500
 
 # For each author,
 # For each repo, find number of files, insertions, deletions
@@ -18,7 +21,11 @@ for author in $authors; do
     for repo in $repos; do
 	cd $repo
 	if [ $? = 0 ]; then
-	    output=`git log --shortstat --author="$author" --since=$since --until=$until | grep "files\? changed" | awk '{files += $1; insertions += ($4 < 1000 ? $4 : 0); deletions += ($6 < 1000 ? $6 : 0)} END {print files, insertions, deletions}'`
+	    read cmd <<EOF
+git log --shortstat --author="<$author@" --since=$since --until=$until | grep "files\\\? changed" | awk -v ignore_commits_with_lines="$ignore_commits_with_lines" '{files += \$\1; insertions += (\$\4 < ignore_commits_with_lines ? \$\4 : 0); deletions += (\$\6 < ignore_commits_with_lines ? \$\6 : 0); if (1) {print files, insertions, deletions | "cat 1>&2"  }} END {print files, insertions, deletions}'
+EOF
+	    # echo $cmd
+	    output=`eval $cmd`
 	    read files1 insertions1 deletions1 <<EOF
 `echo $output`
 EOF
@@ -35,6 +42,10 @@ EOF
 	    insertions=`expr $insertions + $insertions1`
 	    deletions=`expr $deletions + $deletions1`
 
+	    if (($files1 > 0)); then
+                echo "$repo -> $author $files1 $insertions1 $deletions1"
+            fi
+            
 	    cd - > /dev/null 2>&1
 	fi
     done
